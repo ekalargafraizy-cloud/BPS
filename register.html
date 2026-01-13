@@ -14,33 +14,59 @@
     <style>
         body {
             min-height: 100vh;
-            background: linear-gradient(120deg, #c78938, #d47b06);
+            background: linear-gradient(120deg, #f6c23e, #d47b06, #c78938);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .glass-card {
-            background: rgba(241, 178, 4, 0);
-            backdrop-filter: blur(15px);
-            border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.25);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(18px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             color: #fff;
         }
+
         .form-control {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.25);
             border: none;
             color: #fff;
+            padding: 12px;
         }
+
+        .form-control:focus {
+            background: rgba(255,255,255,0.35);
+            box-shadow: none;
+            color: #fff;
+        }
+
         .form-control::placeholder {
-            color: #e0e0e0;
+            color: #f0f0f0;
         }
+
         .btn-register {
             background: linear-gradient(45deg, #f6c23e, #f4b619);
             border: none;
+            transition: 0.3s;
         }
+
         .btn-register:hover {
-            transform: scale(1.03);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -48,31 +74,51 @@
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-5">
             <div class="glass-card p-4">
-                <h3 class="text-center fw-bold mb-4">Registrasi Akun</h3>
+                <h3 class="text-center fw-bold mb-4">
+                    <i class="bi bi-person-plus-fill"></i> Registrasi Akun
+                </h3>
 
-                <form>
-                    <input type="text" class="form-control mb-3" placeholder="Username" required>
-                    <input type="password" class="form-control mb-3" placeholder="Password" required>
-                    <input type="password" class="form-control mb-3" placeholder="Konfirmasi Password" required>
+                <!-- FORM REGISTRASI -->
+                <form onsubmit="return registerUser()">
+                    <input type="text" id="username" class="form-control mb-3" placeholder="Username" required>
+                    <input type="password" id="password" class="form-control mb-3" placeholder="Password" required>
+                    <input type="password" id="confirm" class="form-control mb-3" placeholder="Konfirmasi Password" required>
 
                     <div class="d-grid">
-                        <button class="btn btn-register btn-lg text-white">
-                            <i class="bi bi-person-plus-fill"></i> Daftar
+                        <button type="submit" class="btn btn-register btn-lg text-white">
+                            Daftar
                         </button>
                     </div>
                 </form>
 
                 <div class="text-center mt-3">
-                    <a href="login.html" class="text-white text-decoration-none">
-                        ← Kembali ke Login
+                    <a href="index.html" class="text-white text-decoration-none">
+                        ← Kembali ke index
                     </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- SCRIPT SOLUSI -->
+<script>
+function registerUser(){
+    const password = document.getElementById("password").value;
+    const confirm  = document.getElementById("confirm").value;
+
+    if(password !== confirm){
+        alert("Password dan konfirmasi tidak sama!");
+        return false;
+    }
+
+    alert("Registrasi berhasil! Silakan login.");
+    window.location.href = "login.html";
+    return false;
+}
+</script>
 
 </body>
 </html>
