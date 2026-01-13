@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Voting Karyawan Terbaik</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h3 class="fw-bold mb-4">🗳️ Voting Karyawan Terbaik</h3>
+    <p class="text-muted">Pilih 1 karyawan terbaik dari hasil seleksi admin</p>
+
+    <form id="voteForm">
+        <div class="row" id="candidateList"></div>
+
+        <button class="btn btn-success mt-4 w-100">
+            Kirim Voting
+        </button>
+    </form>
+</div>
+
+<script>
+    const candidates = JSON.parse(localStorage.getItem("top5Final")) || [];
+    let votes = JSON.parse(localStorage.getItem("votesFinal")) || {};
+    let userVoted = localStorage.getItem("hasVoted");
+
+    const container = document.getElementById("candidateList");
+
+    candidates.forEach(c => {
+        if (!votes[c.Nama]) votes[c.Nama] = 0;
+
+        container.innerHTML += `
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" 
+                            name="vote" value="${c.Nama}" required>
+                        <label class="form-check-label fw-semibold">
+                            ${c.Nama} <br>
+                            <small class="text-muted">Nilai awal: ${c.Nilai}</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById("voteForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        if (userVoted) {
+            alert("Anda sudah melakukan voting.");
+            return;
+        }
+
+        const selected = document.querySelector('input[name="vote"]:checked').value;
+
+        votes[selected]++;
+        localStorage.setItem("votesFinal", JSON.stringify(votes));
+        localStorage.setItem("hasVoted", "true");
+
+        alert("Terima kasih, voting berhasil!");
+        location.reload();
+    });
+</script>
+
+</body>
+</html>
