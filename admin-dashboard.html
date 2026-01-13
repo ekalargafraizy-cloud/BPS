@@ -190,11 +190,50 @@ body::before{
         radial-gradient(circle at 50% 90%, rgba(14,165,233,.12), transparent 40%);
     z-index:-1;
 }
+/* ===== OFF CANVAS SIDEBAR FIX ===== */
+
+/* Sidebar benar-benar off canvas */
+.sidebar{
+    transform: translateX(-100%);
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+    z-index: 1200;
+}
+
+/* Sidebar aktif */
+.sidebar:not(.hide){
+    transform: translateX(0);
+}
+
+/* Overlay gelap */
+.sidebar-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: .35s ease;
+    z-index: 1100;
+}
+
+/* Overlay aktif */
+.sidebar:not(.hide) ~ .sidebar-overlay{
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Content TIDAK digeser (off canvas asli) */
+.content,
+.content.full{
+    margin-left: 0 !important;
+}
+
 
 </style>
 </head>
 
 <body>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
