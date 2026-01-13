@@ -1,70 +1,215 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Voting Karyawan Terbaik</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Voting Karyawan Terbaik</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+:root{
+    --primary:#4f46e5;
+    --secondary:#6366f1;
+}
+
+/* BACKGROUND */
+body{
+    min-height:100vh;
+    font-family:'Segoe UI',sans-serif;
+    background: linear-gradient(120deg,#eef2ff,#e0e7ff,#f0f9ff,#ecfeff,#f8fafc);
+    background-size:300% 300%;
+    animation:gradientMove 14s ease infinite;
+}
+
+@keyframes gradientMove{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+/* TOPBAR */
+.topbar{
+    height:60px;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(10px);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    position:fixed;
+    top:0;
+    width:100%;
+    z-index:1000;
+}
+
+.menu-btn{
+    font-size:1.6rem;
+    cursor:pointer;
+}
+
+/* CONTENT */
+.voting-box{
+    max-width:900px;
+    margin:auto;
+    margin-top:110px;
+}
+
+/* CARD */
+.card{
+    border:none;
+    border-radius:18px;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(10px);
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+    transition:.35s;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+}
+
+/* BUTTON */
+.btn-submit{
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    border:none;
+    padding:14px;
+    font-size:1.1rem;
+    font-weight:600;
+}
+</style>
 </head>
-<body class="bg-light">
 
-<div class="container mt-5">
-    <h3 class="fw-bold mb-4">🗳️ Voting Karyawan Terbaik</h3>
-    <p class="text-muted">Pilih 1 karyawan terbaik dari hasil seleksi admin</p>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+    <span class="menu-btn" data-bs-toggle="offcanvas" data-bs-target="#profilePanel">
+        ☰
+    </span>
+    <h5 class="fw-bold mb-0">🗳️ Voting Karyawan Terbaik</h5>
+</div>
+
+<!-- ===== OFFCANVAS PROFILE PANEL ===== -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="profilePanel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Profil Akun</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body text-center">
+        <img id="photoPreview"
+             src="https://via.placeholder.com/120"
+             class="rounded-circle mb-3"
+             width="120" height="120"
+             style="object-fit:cover;border:3px solid var(--primary)">
+
+        <h5 class="fw-bold" id="usernameDisplay">User</h5>
+        <p class="text-muted">Akun Voting</p>
+
+        <input type="file"
+               class="form-control mt-3"
+               accept="image/*"
+               onchange="uploadUserPhoto(event)">
+
+        <hr>
+
+        <button class="btn btn-danger w-100" onclick="logoutUser()">
+            Logout
+        </button>
+    </div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="container voting-box">
+    <h3 class="fw-bold mb-2">🗳️ Voting Karyawan Terbaik</h3>
+    <p class="text-muted mb-4">
+        Pilih <b>1 karyawan terbaik</b> dari 5 besar hasil seleksi admin
+    </p>
 
     <form id="voteForm">
         <div class="row" id="candidateList"></div>
 
-        <button class="btn btn-success mt-4 w-100">
+        <button class="btn btn-submit mt-4 w-100">
             Kirim Voting
         </button>
     </form>
 </div>
 
+<!-- SCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    const candidates = JSON.parse(localStorage.getItem("top5Final")) || [];
-    let votes = JSON.parse(localStorage.getItem("votesFinal")) || {};
-    let userVoted = localStorage.getItem("hasVoted");
+/* ===== PROTEKSI USER ===== */
+if(localStorage.getItem("role") !== "user"){
+    window.location.href = "index.html";
+}
 
-    const container = document.getElementById("candidateList");
+/* ===== USERNAME ===== */
+const currentUser = localStorage.getItem("currentUser");
+document.getElementById("usernameDisplay").innerText = currentUser || "User";
 
-    candidates.forEach(c => {
-        if (!votes[c.Nama]) votes[c.Nama] = 0;
+/* ===== FOTO PROFIL ===== */
+const photoKey = "userPhoto_" + currentUser;
+const savedPhoto = localStorage.getItem(photoKey);
 
-        container.innerHTML += `
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" 
-                            name="vote" value="${c.Nama}" required>
-                        <label class="form-check-label fw-semibold">
-                            ${c.Nama} <br>
-                            <small class="text-muted">Nilai awal: ${c.Nilai}</small>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
+if(savedPhoto){
+    document.getElementById("photoPreview").src = savedPhoto;
+}
 
-    document.getElementById("voteForm").addEventListener("submit", function(e) {
-        e.preventDefault();
+function uploadUserPhoto(e){
+    const file = e.target.files[0];
+    if(!file) return;
 
-        if (userVoted) {
-            alert("Anda sudah melakukan voting.");
-            return;
-        }
+    const reader = new FileReader();
+    reader.onload = () => {
+        localStorage.setItem(photoKey, reader.result);
+        document.getElementById("photoPreview").src = reader.result;
+    };
+    reader.readAsDataURL(file);
+}
 
-        const selected = document.querySelector('input[name="vote"]:checked').value;
+/* ===== LOGOUT ===== */
+function logoutUser(){
+    localStorage.removeItem("role");
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html";
+}
 
-        votes[selected]++;
-        localStorage.setItem("votesFinal", JSON.stringify(votes));
-        localStorage.setItem("hasVoted", "true");
+/* ===== VOTING LOGIC (TIDAK DIUBAH) ===== */
+const candidates = JSON.parse(localStorage.getItem("top5Final")) || [];
+let votes = JSON.parse(localStorage.getItem("votesFinal")) || {};
+let userVoted = localStorage.getItem("hasVoted");
+const container = document.getElementById("candidateList");
 
-        alert("Terima kasih, voting berhasil!");
-        location.reload();
-    });
+candidates.forEach(c => {
+    if (!votes[c.Nama]) votes[c.Nama] = 0;
+    container.innerHTML += `
+        <div class="col-md-4 mb-4">
+            <label class="card p-4 h-100">
+                <input type="radio" name="vote" value="${c.Nama}" required>
+                <h5 class="mt-2">${c.Nama}</h5>
+                <small class="text-muted">Nilai Awal: ${c.Nilai}</small>
+            </label>
+        </div>
+    `;
+});
+
+document.getElementById("voteForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    if(userVoted){
+        alert("Anda sudah melakukan voting.");
+        return;
+    }
+    const selected = document.querySelector('input[name="vote"]:checked').value;
+    votes[selected]++;
+    localStorage.setItem("votesFinal", JSON.stringify(votes));
+    localStorage.setItem("hasVoted", "true");
+    alert("Voting berhasil!");
+    location.reload();
+});
 </script>
 
 </body>
