@@ -244,11 +244,25 @@ body::before{
 <!-- SIDEBAR -->
 <div class="sidebar hide" id="sidebar">
     <h5 class="fw-bold text-center mb-4">ADMIN PANEL</h5>
-    <a href="#"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="#"><i class="bi bi-upload"></i> Upload Excel</a>
-    <a href="user-voting.html"><i class="bi bi-people"></i> Voting User</a>
-    <a href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
+
+    <a href="#" onclick="toggleSidebar()">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <a href="#" onclick="goToUpload()">
+        <i class="bi bi-upload"></i> Upload Excel
+    </a>
+
+    <a href="#" onclick="goToVoting()">
+        <i class="bi bi-people"></i> Voting User
+    </a>
+
+    <a href="index.html" onclick="logoutAdmin()">
+    <i class="bi bi-box-arrow-right"></i> Logout
+</a>
+
 </div>
+
 
 <!-- CONTENT -->
 <div class="content full" id="content">
@@ -258,20 +272,22 @@ body::before{
         <div class="col-md-4">
             <div class="card stat-card p-4 text-center">
                 <h6>Total Data Karyawan</h6>
-                <h3 id="totalData">0</h3>
+                <h3 id="totalData">-</h3>
             </div>
         </div>
     </div>
 
     <!-- UPLOAD -->
-    <div class="card p-4 mb-4">
+    <div class="card p-4 mb-4" id="uploadSection">
+
         <h5 class="fw-bold mb-3">📥 Upload Data Excel</h5>
         <input type="file" id="excelFile" class="form-control" accept=".xlsx,.xls">
         <small class="text-muted">Format kolom: <b>Nama</b> | <b>Nilai</b></small>
     </div>
 
     <!-- TOP 5 -->
-    <div class="card p-4 mb-4">
+    <div class="card p-4 mb-4" id="topFiveSection">
+
         <h5 class="fw-bold mb-3">🏆 5 Karyawan Terbaik</h5>
         <table class="table table-hover">
             <thead>
@@ -290,7 +306,8 @@ body::before{
     </div>
 
     <!-- VOTING RESULT -->
-    <div class="card p-4">
+   <div class="card p-4" id="votingSection">
+
         <h5 class="fw-bold mb-3">📈 Hasil Voting User</h5>
         <table class="table table-hover">
             <thead>
@@ -318,6 +335,7 @@ function toggleSidebar(){
     content.classList.toggle("full");
 }
 
+
 const fileInput=document.getElementById("excelFile");
 const topFiveTable=document.getElementById("topFive");
 const totalDataEl=document.getElementById("totalData");
@@ -334,23 +352,37 @@ fileInput.addEventListener("change",e=>{
 });
 
 function processData(data){
-    totalDataEl.textContent=data.length;
-    data.forEach(d=>d.Nilai=parseInt(d.Nilai));
-    data.sort((a,b)=>b.Nilai-a.Nilai);
+    // JIKA DATA KOSONG
+    if(!data || data.length === 0){
+        totalDataEl.textContent = "–";
+        topFiveTable.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center text-muted">
+                    Data belum tersedia
+                </td>
+            </tr>`;
+        return;
+    }
 
-    const top5=data.slice(0,5);
-    localStorage.setItem("top5Final",JSON.stringify(top5));
+    totalDataEl.textContent = data.length;
+
+    data.forEach(d => d.Nilai = parseInt(d.Nilai) || 0);
+    data.sort((a,b) => b.Nilai - a.Nilai);
+
+    const top5 = data.slice(0,5);
+    localStorage.setItem("top5Final", JSON.stringify(top5));
     localStorage.removeItem("votesFinal");
 
-    topFiveTable.innerHTML="";
+    topFiveTable.innerHTML = "";
     top5.forEach((d,i)=>{
-        topFiveTable.innerHTML+=`
+        topFiveTable.innerHTML += `
         <tr>
             <td><span class="badge-rank">#${i+1}</span></td>
             <td>${d.Nama}</td>
             <td>${d.Nilai}</td>
         </tr>`;
     });
+
     renderVoting();
 }
 
@@ -373,7 +405,33 @@ function renderVoting(){
         </tr>`;
     });
 }
+
 renderVoting();
+function goToUpload(){
+    toggleSidebar();
+    document.getElementById("uploadSection")
+        .scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function goToVoting(){
+    toggleSidebar();
+    renderVoting(); // real-time refresh
+    document.getElementById("votingSection")
+        .scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function logoutAdmin(){
+    // tutup sidebar
+    if(!sidebar.classList.contains("hide")){
+        toggleSidebar();
+    }
+
+    // bersihkan session lokal (AMAN)
+    localStorage.removeItem("top5Final");
+    localStorage.removeItem("votesFinal");
+
+    // arahkan ke login
+    window.location.href = "login.html";
+}
 </script>
 
 </body>
